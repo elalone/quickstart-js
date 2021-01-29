@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Firebase Hosting</title>
+
+    <!-- update the version number as needed -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need
+    <script defer src="/__/firebase/8.2.4/firebase-auth.js"></script>
+    <script defer src="/__/firebase/8.2.4/firebase-database.js"></script>
+    <script defer src="/__/firebase/8.2.4/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/8.2.4/firebase-storage.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <!-- <script defer src="/__/firebase/init.js"></script> -->
+    <script src="/__/firebase/init.js"></script>
+    <!--Firebase Auth UI-->
+<script src="https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth.js"></script>
+<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth.css" />
+
+    
+
+    <style media="screen">
+      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
+      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
+      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
+      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+      @media (max-width: 600px) {
+        body, #message { margin-top: 0; background: white; box-shadow: none; }
+        body { border-top: 16px solid #ffa100; }
+      }
+      #data-table {
+    font-family: calibri, arial;
+    width: 400px;
+}
+
+#data-table thead td {
+    background-color: #8CCCF1;
+}
+
+#data-table td {
+    border: 1px solid #466E85;
+    width: 136px;
+    padding: 7px;
+}
+    </style>
+  </head>
+  <body>
+    <div id="message">
+      <h2>Syracuse Sharps Disposal</h2>
+      <p>Click to visit OCRRA Reference for sharp disposal</p>
+      <a target="_blank" href="https://ocrra.org/how-do-i-get-rid-of/sharps/">OCCRA Disposal Reference</a>
+    </div>
+    <p id="load">Firebase SDK Loading&hellip;</p>
+    <table id="data-table"></table>
+
+<br />
+<button id="btn-load">Load List 1</button>&nbsp;
+<button id="btn-update">Load List 2</button>&nbsp;
+<button id="btn-append">Append List 1</button>&nbsp;
+<button id="btn-clear">Clear List</button>&nbsp;
+
+<!-- The surrounding HTML is left untouched by FirebaseUI.
+     Your app may use that space for branding, controls and other customizations.-->
+     <h1>Welcome to My Awesome App</h1>
+     <div id="firebaseui-auth-container"></div>
+     <div id="loader">Loading...</div>
+
+
+    <script>
+// firebase.initializeApp({
+//   apiKey: '921199199285-k057tek3ds91dcfcjokiucciov3mjphi.apps.googleusercontent.com',
+//   authDomain: '### FIREBASE AUTH DOMAIN ###',
+//   projectId: 'syracuse-sharps-disposal'
+// });
+
+var uiConfig = {
+        signInSuccessUrl: '<url-to-redirect-to-on-success>',
+        signInOptions: [
+          // Leave the lines as is for the providers you want to offer your users.
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID
+        ],
+        // tosUrl and privacyPolicyUrl accept either url string or a callback
+        // function.
+        // Terms of service url/callback.
+        tosUrl: '<your-tos-url>',
+        // Privacy policy url/callback.
+        privacyPolicyUrl: function() {
+          window.location.assign('<your-privacy-policy-url>');
+        }
+      };
+
+      // Initialize the FirebaseUI Widget using Firebase.
+      var ui = new firebaseui.auth.AuthUI(firebase.auth());
+      ui.start('#firebaseui-auth-container', uiConfig);
+
+var data1 = [{
+    field1: 'value a1',
+    field2: 'value a2',
+    field3: 'value a3',
+    field4: 'value a4'
+  },
+  {
+    field1: 'value b1',
+    field2: 'value b2',
+    field3: 'value b3',
+    field4: 'value b4'
+  },
+  {
+    field1: 'value c1',
+    field2: 'value c2',
+    field3: 'value c3',
+    field4: 'value c4'
+  }
+];
+
+var db = firebase.firestore();
+db.collection('DisposalSites').doc("iHMrammZTqjiiGfjJIy8").get()
+  .then((snapshot) => {
+    var int  = 0;
+ //   snapshot.forEach((doc) => {
+ //     data1[int].field1 = doc.data();
+      data1[int].field1 = snapshot.data()["City"];
+      data1[int].field2 = snapshot.data()["Site Name"];
+      data1[int].field3 = snapshot.data()["Street Name"];
+      
+
+     // console.log(doc.id, '=>', doc.data());
+  //  });
+  })
+  .catch((err) => {
+    console.log('Error getting documents', err);
+  });
+
+  var dynamicTable = (function() {
+
+var _tableId, _table,
+  _fields, _headers,
+  _defaultText;
+
+
+/** Builds the row with columns from the specified names. 
+ *  If the item parameter is specified, the memebers of the names array will be used as property names of the item; otherwise they will be directly parsed as text.
+ */
+function _buildRowColumns(names, item) {
+  var row = '<tr>';
+  if (names && names.length > 0) {
+    $.each(names, function(index, name) {
+      var c = item ? item[name + ''] : name;
+      row += '<td>' + c + '</td>';
+    });
+  }
+  row += '</tr>';
+  return row;
+}
+
+/** Builds and sets the headers of the table. */
+function _setHeaders() {
+  // if no headers specified, we will use the fields as headers.
+  _headers = (_headers == null || _headers.length < 1) ? _fields : _headers;
+  var h = _buildRowColumns(_headers);
+  if (_table.children('thead').length < 1) _table.prepend('<thead></thead>');
+  _table.children('thead').html(h);
+}
+
+function _setNoItemsInfo() {
+  if (_table.length < 1) return; //not configured.
+  var colspan = _headers != null && _headers.length > 0 ?
+    'colspan="' + _headers.length + '"' : '';
+  var content = '<tr class="no-items"><td ' + colspan + ' style="text-align:center">' +
+    _defaultText + '</td></tr>';
+  if (_table.children('tbody').length > 0)
+    _table.children('tbody').html(content);
+  else _table.append('<tbody>' + content + '</tbody>');
+}
+
+function _removeNoItemsInfo() {
+  var c = _table.children('tbody').children('tr');
+  if (c.length == 1 && c.hasClass('no-items')) _table.children('tbody').empty();
+}
+
+return {
+  /** Configres the dynamic table. */
+  config: function(tableId, fields, headers, defaultText) {
+    _tableId = tableId;
+    _table = $('#' + tableId);
+    _fields = fields || null;
+    _headers = headers || null;
+    _defaultText = defaultText || 'No items to list...';
+    _setHeaders();
+    _setNoItemsInfo();
+    return this;
+  },
+  /** Loads the specified data to the table body. */
+  load: function(data, append) {
+    if (_table.length < 1) return; //not configured.
+    _setHeaders();
+    _removeNoItemsInfo();
+    if (data && data.length > 0) {
+      var rows = '';
+      $.each(data, function(index, item) {
+        rows += _buildRowColumns(_fields, item);
+      });
+      var mthd = append ? 'append' : 'html';
+      _table.children('tbody')[mthd](rows);
+    } else {
+      _setNoItemsInfo();
+    }
+    return this;
+  },
+  /** Clears the table body. */
+  clear: function() {
+    _setNoItemsInfo();
+    return this;
+  }
+};
+}());
+
+$(document).ready(function(e) {
+
+
+
+var data2 = [{
+    field1: 'new value a1',
+    field2: 'new value a2',
+    field3: 'new value a3'
+  },
+  {
+    field1: 'new value b1',
+    field2: 'new value b2',
+    field3: 'new value b3'
+  },
+  {
+    field1: 'new value c1',
+    field2: 'new value c2',
+    field3: 'new value c3'
+  }
+];
+
+var dt = dynamicTable.config('data-table',
+  ['field1', 'field2', 'field3'],
+  ['City', 'Site Name', 'Street Name'], //set to null for field names instead of custom header names
+  'There are no items to list...');
+
+
+$('#btn-load').click(function(e) {
+  dt.load(data1);
+});
+
+$('#btn-update').click(function(e) {
+  dt.load(data2);
+});
+
+$('#btn-append').click(function(e) {
+  dt.load(data1, true);
+});
+
+$('#btn-clear').click(function(e) {
+  dt.clear();
+});
+
+});
+
+
+   //   document.addEventListener('DOMContentLoaded', function() {
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+        // // The Firebase SDK is initialized and available here!
+        //
+        // firebase.auth().onAuthStateChanged(user => { });
+        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
+        // firebase.messaging().requestPermission().then(() => { });
+        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
+        //
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+
+      //   try {
+      //     let app = firebase.app;
+      //     let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
+      //     document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
+      //   } catch (e) {
+      //     console.error(e);
+      //     document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
+      //   }
+      // });
+    </script>
+    
+  </body>
+</html>
